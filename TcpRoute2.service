@@ -1,0 +1,10 @@
+[Unit]
+Description=TcpRoute2
+Documentation=https://blog.ruiruige1991.xyz
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/root/install/TcpRoute2/TcpRoute2-linux-amd64 -config /root/install/TcpRoute2/config.toml >> /var/log/TcpRoute2/TcpRoute2.log 2>&1 &
+ExecStop=/usr/bin/killall TcpRoute2-linux-amd64
+LimitNOFILE=65535

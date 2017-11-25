@@ -1,0 +1,10 @@
+[Unit]
+Description=redsocks, tranparent proxy
+Documentation=https://blog.ruiruige1991.xyz
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/redsocks -c /etc/redsocks.conf >> /var/log/redsocks/redsocks.log 2>&1 &
+ExecStop=/usr/bin/killall redsocks
+LimitNOFILE=65535
