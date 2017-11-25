@@ -1,6 +1,10 @@
 #!/usr/bin/env python
 # coding=utf-8
 
+"""健康检查的脚本
+
+[description]
+"""
 import subprocess
 
 import dns.resolver
@@ -12,6 +16,16 @@ cmdline_list = [" ".join(psutil.Process(pid).cmdline()) for pid in pid_list]
 
 
 def check_process(name=None):
+    """检查一个进程在不在
+
+    [description]
+
+    Keyword Arguments:
+        name {[type]} -- [description] (default: {None})
+
+    Returns:
+        bool -- [description]
+    """
     for cmdline in cmdline_list:
         if name in cmdline:
             return True
@@ -19,10 +33,27 @@ def check_process(name=None):
 
 
 def check_listen_port(port=None):
+    """检查监听端口
+
+    [description]
+
+    Keyword Arguments:
+        port {[type]} -- [description] (default: {None})
+    """
     pass
 
 
 def native_shell(cmd=None):
+    """运行本地shell
+
+    [description]
+
+    Keyword Arguments:
+        cmd {[type]} -- [description] (default: {None})
+
+    Returns:
+        [type] -- [description]
+    """
     pipe = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE,
                             stderr=subprocess.PIPE)
     stdout, stderr = pipe.communicate()
@@ -30,6 +61,16 @@ def native_shell(cmd=None):
 
 
 def get_proc_max_fd(pid=None):
+    """获取进程fd的限制
+
+    [description]
+
+    Keyword Arguments:
+        pid {[type]} -- [description] (default: {None})
+
+    Returns:
+        [type] -- [description]
+    """
     cmd = "cat /proc/%d/limits | grep 'Max open files' | awk '{print $5}'" % pid
     # Max open files 65535 65535 files
     # $1   $2   $3     $4    $5    $6~
@@ -41,6 +82,16 @@ def get_proc_max_fd(pid=None):
 
 
 def get_pid_by_cmdline(name=None):
+    """通过进程的命令行找到进程的pid
+
+    [description]
+
+    Keyword Arguments:
+        name {[type]} -- [description] (default: {None})
+
+    Returns:
+        [type] -- [description]
+    """
     for pid in pid_list:
         cmdline = " ".join(psutil.Process(pid).cmdline())
         if name in cmdline:
@@ -48,7 +99,15 @@ def get_pid_by_cmdline(name=None):
 
 
 def check_dns():
+    """检查DNS相关业务
+
+    [description]
+    """
     def check_dns_resolve():
+        """检查DNS解析是否正常
+
+        [description]
+        """
         print("checking DNS resolve")
         my_resolver = dns.resolver.Resolver()
         my_resolver.nameservers = ['127.0.0.1']
@@ -66,6 +125,10 @@ def check_dns():
             print(" ")
 
     def check_dnsmasq():
+        """检查dnsmasq组件
+
+        [description]
+        """
         print("checking dnsmasq")
         rst = check_process(
             name="/usr/sbin/dnsmasq -x /var/run/dnsmasq/dnsmasq.pid -u dnsmasq")
@@ -76,6 +139,10 @@ def check_dns():
         print(" ")
 
     def check_overture():
+        """检查overture
+
+        [description]
+        """
         print("checking overture")
         rst = check_process(
             name="/root/install/overture/overture-linux-amd64")
@@ -91,6 +158,10 @@ def check_dns():
 
 
 def check_TcpRoute():
+    """检查TcpRoute
+
+    [description]
+    """
     print("checking TcpRoute process")
     rst = check_process(
         name="/root/install/TcpRoute2/TcpRoute2-linux-amd64")
@@ -112,6 +183,10 @@ def check_TcpRoute():
 
 
 def check_redsocks():
+    """检查透明代理软件redsocks
+
+    [description]
+    """
     print("checking redsocks process")
     rst = check_process(
         name="/usr/local/bin/redsocks -c /etc/redsocks.conf")
@@ -132,15 +207,38 @@ def check_redsocks():
         print("checking redsocks max fd OK")
 
 
-def check_internal_ip():
-    pass
+def check_ip_exist(ip=None):
+    """检查IP是否存在
+
+    [description]
+    """
+    cmd = "ifconfig | grep %s" % ip
+    out, err = native_shell(cmd=cmd)
+    if not out:
+        print("%s IP 不存在" % ip)
+        print(err)
+
+
+def check_ips():
+    """检查IP
+
+    [description]
+    """
+    print("checking ips")
+    check_ip_exist(ip="192.168.1.15")
+    check_ip_exist(ip="192.168.3.233")
+    print("checking finished")
 
 
 def check_all():
+    """检查所有的内容，主要的入口点
+
+    [description]
+    """
     check_dns()
     check_TcpRoute()
     check_redsocks()
-
+    check_ips()
 
 if __name__ == '__main__':
     check_all()
